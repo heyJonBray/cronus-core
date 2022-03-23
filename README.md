@@ -4,12 +4,10 @@ This project demonstrates a basic Hardhat use case. It comes with a sample contr
 
 Try running some of the following tasks:
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+```bash
+
+MasterChefCronus address: 0x5C6ef4d8b2Ebd1362E711BDF7Ae6291c14609954
+CronusToken address: 0x8Ce12Cb0CBAE2463b7f0f659449E2fD4988dB5B1
+
+
 ```
