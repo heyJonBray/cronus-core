@@ -25,8 +25,8 @@ async function main() {
     const _MasterChefCronus = await ethers.getContractFactory("MasterChefCronus");
     const MasterChefCronus = await _MasterChefCronus.deploy(CronusToken.address, deployer.address, deployer.address, deployer.address, 1000000000, 1648030661, 200, 0, 0);
 
-  console.log("MasterChefCronus address:", MasterChefCronus.address);
-  console.log("CronusToken address:", CronusToken.address);
+    console.log("MasterChefCronus address:", MasterChefCronus.address);
+    console.log("CronusToken address:", CronusToken.address);
 
 
 }

@@ -8,7 +8,10 @@ async function main() {
 
   //const WETH = await ethers.getContractFactory("WEVMOS");
   //const weth = await WETH.deploy();
-  /*
+
+  const Multicall = await ethers.getContractFactory("Multicall");
+  const multicall = await Multicall.deploy();
+  
   const LPtoken = await ethers.getContractFactory("CronusERC20");
   const lptoken = await LPtoken.deploy();
 
@@ -16,19 +19,20 @@ async function main() {
   const factory = await Factory.deploy(deployer.address);
 
   const Router = await ethers.getContractFactory("CronusRouter02");
-  const router = await Router.deploy(factory.address, "0xcF5ef8d007a616066e5eaEa0916592374a0F478D");
+  const router = await Router.deploy(factory.address, "0xc778417E063141139Fce010982780140Aa0cD5Ab");
 
-  //console.log("WEVMOS address:", weth.address);
+  console.log("Multicall address:", multicall.address);
   console.log("LPtoken address:", lptoken.address);
   console.log("Factory address:", factory.address);
   console.log("Router address:", router.address);
-*/
 
+/*
 
   const WETH = await ethers.getContractFactory("MockERC20");
   const dai = await WETH.deploy("DAI","DAI");
   const usdc = await WETH.deploy("USDC","USDC");
   const usdt = await WETH.deploy("USDT","USDT");
+
 
   //await usdt.mint("0x9404DD94445a3b2043C9732F54eb78bD8Bc36aD8","10000000000000000000000");
   //await usdc.mint("0x9404DD94445a3b2043C9732F54eb78bD8Bc36aD8","10000000000000000000000");
@@ -64,6 +68,8 @@ async function main() {
   console.log("usdc address:", usdc.address);
   console.log("usdt address:", usdt.address);
   //console.log("Balance:", balance);
+
+  */
 }
 
 main()

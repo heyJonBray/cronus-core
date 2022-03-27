@@ -31,6 +31,10 @@ module.exports = {
     testnet: {
       url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    rinkeby: {
+      url: "https://rinkeby.infura.io/v3/c4391fb7499c4423b6e8a62e0e87359d",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }
   },
   gasReporter: {
