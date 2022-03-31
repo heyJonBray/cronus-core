@@ -8,16 +8,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /**
- * @title Stable JOE Staking
- * @author Trader Joe
- * @notice StableJoeStaking is a contract that allows JOE deposits and receives stablecoins sent by MoneyMaker's daily
- * harvests. Users deposit JOE and receive a share of what has been sent by MoneyMaker based on their participation of
- * the total deposited JOE. It is similar to a MasterChef, but we allow for claiming of different reward tokens
+ * @title Stable Cronus Staking
+ * @author Trader Cronus
+ * @notice StableCronusStaking is a contract that allows CRN deposits and receives stablecoins sent by MoneyMaker's daily
+ * harvests. Users deposit CRN and receive a share of what has been sent by MoneyMaker based on their participation of
+ * the total deposited CRN. It is similar to a MasterChef, but we allow for claiming of different reward tokens
  * (in case at some point we wish to change the stablecoin rewarded).
  * Every time `updateReward(token)` is called, We distribute the balance of that tokens as rewards to users that are
  * currently staking inside this contract, and they can claim it using `withdraw(0)`
  */
-contract StableJoeStaking is Ownable {
+contract StableCronusStaking is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -26,12 +26,12 @@ contract StableJoeStaking is Ownable {
         uint256 amount;
         mapping(IERC20 => uint256) rewardDebt;
         /**
-         * @notice We do some fancy math here. Basically, any point in time, the amount of JOEs
+         * @notice We do some fancy math here. Basically, any point in time, the amount of CRNs
          * entitled to a user but is pending to be distributed is:
          *
          *   pending reward = (user.amount * accRewardPerShare) - user.rewardDebt[token]
          *
-         * Whenever a user deposits or withdraws JOE. Here's what happens:
+         * Whenever a user deposits or withdraws CRN. Here's what happens:
          *   1. accRewardPerShare (and `lastRewardBalance`) gets updated
          *   2. User receives the pending reward sent to his/her address
          *   3. User's `amount` gets updated
@@ -39,11 +39,11 @@ contract StableJoeStaking is Ownable {
          */
     }
 
-    IERC20 public joe;
+    IERC20 public CRN;
 
-    /// @dev Internal balance of JOE, this gets updated on user deposits / withdrawals
-    /// this allows to reward users with JOE
-    uint256 public internalJoeBalance;
+    /// @dev Internal balance of CRN, this gets updated on user deposits / withdrawals
+    /// this allows to reward users with CRN
+    uint256 public internalCronusBalance;
     /// @notice Array of tokens that users can claim
     IERC20[] public rewardTokens;
     mapping(IERC20 => bool) public isRewardToken;
@@ -62,22 +62,22 @@ contract StableJoeStaking is Ownable {
     /// @notice The precision of `accRewardPerShare`
     uint256 public ACC_REWARD_PER_SHARE_PRECISION;
 
-    /// @dev Info of each user that stakes JOE
+    /// @dev Info of each user that stakes CRN
     mapping(address => UserInfo) private userInfo;
 
-    /// @notice Emitted when a user deposits JOE
+    /// @notice Emitted when a user deposits CRN
     event Deposit(address indexed user, uint256 amount, uint256 fee);
 
     /// @notice Emitted when owner changes the deposit fee percentage
     event DepositFeeChanged(uint256 newFee, uint256 oldFee);
 
-    /// @notice Emitted when a user withdraws JOE
+    /// @notice Emitted when a user withdraws CRN
     event Withdraw(address indexed user, uint256 amount);
 
     /// @notice Emitted when a user claims reward
     event ClaimReward(address indexed user, address indexed rewardToken, uint256 amount);
 
-    /// @notice Emitted when a user emergency withdraws its JOE
+    /// @notice Emitted when a user emergency withdraws its CRN
     event EmergencyWithdraw(address indexed user, uint256 amount);
 
     /// @notice Emitted when owner adds a token to the reward tokens list
@@ -90,23 +90,22 @@ contract StableJoeStaking is Ownable {
      * @dev This contract needs to receive an ERC20 `_rewardToken` in order to distribute them
      * (with MoneyMaker in our case)
      * @param _rewardToken The address of the ERC20 reward token
-     * @param _joe The address of the JOE token
+     * @param _crn The address of the CRN token
      * @param _feeCollector The address where deposit fees will be sent
      * @param _depositFeePercent The deposit fee percent, scalled to 1e18, e.g. 3% is 3e16
      */
     constructor(
         IERC20 _rewardToken,
-        IERC20 _joe,
+        IERC20 _crn,
         address _feeCollector,
         uint256 _depositFeePercent
     ) public {
-        __Ownable_init();
-        require(address(_rewardToken) != address(0), "StableJoeStaking: reward token can't be address(0)");
-        require(address(_joe) != address(0), "StableJoeStaking: joe can't be address(0)");
-        require(_feeCollector != address(0), "StableJoeStaking: fee collector can't be address(0)");
-        require(_depositFeePercent <= 5e17, "StableJoeStaking: max deposit fee can't be greater than 50%");
+        require(address(_rewardToken) != address(0), "StableCronusStaking: reward token can't be address(0)");
+        require(address(_crn) != address(0), "StableCronusStaking: crn can't be address(0)");
+        require(_feeCollector != address(0), "StableCronusStaking: fee collector can't be address(0)");
+        require(_depositFeePercent <= 5e17, "StableCronusStaking: max deposit fee can't be greater than 50%");
 
-        joe = _joe;
+        CRN = _crn;
         depositFeePercent = _depositFeePercent;
         feeCollector = _feeCollector;
 
@@ -117,8 +116,8 @@ contract StableJoeStaking is Ownable {
     }
 
     /**
-     * @notice Deposit JOE for reward token allocation
-     * @param _amount The amount of JOE to deposit
+     * @notice Deposit CRN for reward token allocation
+     * @param _amount The amount of CRN to deposit
      */
     function deposit(uint256 _amount) external {
         UserInfo storage user = userInfo[_msgSender()];
@@ -150,9 +149,9 @@ contract StableJoeStaking is Ownable {
             }
         }
 
-        internalJoeBalance = internalJoeBalance.add(_amountMinusFee);
-        joe.safeTransferFrom(_msgSender(), feeCollector, _fee);
-        joe.safeTransferFrom(_msgSender(), address(this), _amountMinusFee);
+        internalCronusBalance = internalCronusBalance.add(_amountMinusFee);
+        CRN.safeTransferFrom(_msgSender(), feeCollector, _fee);
+        CRN.safeTransferFrom(_msgSender(), address(this), _amountMinusFee);
         emit Deposit(_msgSender(), _amountMinusFee, _fee);
     }
 
@@ -160,7 +159,7 @@ contract StableJoeStaking is Ownable {
      * @notice Get user info
      * @param _user The address of the user
      * @param _rewardToken The address of the reward token
-     * @return The amount of JOE user has deposited
+     * @return The amount of CRN user has deposited
      * @return The reward debt for the chosen token
      */
     function getUserInfo(address _user, IERC20 _rewardToken) external view returns (uint256, uint256) {
@@ -183,9 +182,9 @@ contract StableJoeStaking is Ownable {
     function addRewardToken(IERC20 _rewardToken) external onlyOwner {
         require(
             !isRewardToken[_rewardToken] && address(_rewardToken) != address(0),
-            "StableJoeStaking: token can't be added"
+            "StableCronusStaking: token can't be added"
         );
-        require(rewardTokens.length < 25, "StableJoeStaking: list of token too big");
+        require(rewardTokens.length < 25, "StableCronusStaking: list of token too big");
         rewardTokens.push(_rewardToken);
         isRewardToken[_rewardToken] = true;
         updateReward(_rewardToken);
@@ -197,7 +196,7 @@ contract StableJoeStaking is Ownable {
      * @param _rewardToken The address of the reward token
      */
     function removeRewardToken(IERC20 _rewardToken) external onlyOwner {
-        require(isRewardToken[_rewardToken], "StableJoeStaking: token can't be removed");
+        require(isRewardToken[_rewardToken], "StableCronusStaking: token can't be removed");
         updateReward(_rewardToken);
         isRewardToken[_rewardToken] = false;
         uint256 _len = rewardTokens.length;
@@ -216,7 +215,7 @@ contract StableJoeStaking is Ownable {
      * @param _depositFeePercent The new deposit fee percent
      */
     function setDepositFeePercent(uint256 _depositFeePercent) external onlyOwner {
-        require(_depositFeePercent <= 5e17, "StableJoeStaking: deposit fee can't be greater than 50%");
+        require(_depositFeePercent <= 5e17, "StableCronusStaking: deposit fee can't be greater than 50%");
         uint256 oldFee = depositFeePercent;
         depositFeePercent = _depositFeePercent;
         emit DepositFeeChanged(_depositFeePercent, oldFee);
@@ -229,18 +228,18 @@ contract StableJoeStaking is Ownable {
      * @return `_user`'s pending reward token
      */
     function pendingReward(address _user, IERC20 _token) external view returns (uint256) {
-        require(isRewardToken[_token], "StableJoeStaking: wrong reward token");
+        require(isRewardToken[_token], "StableCronusStaking: wrong reward token");
         UserInfo storage user = userInfo[_user];
-        uint256 _totalJoe = internalJoeBalance;
+        uint256 _totalCrn = internalCronusBalance;
         uint256 _accRewardTokenPerShare = accRewardPerShare[_token];
 
         uint256 _currRewardBalance = _token.balanceOf(address(this));
-        uint256 _rewardBalance = _token == joe ? _currRewardBalance.sub(_totalJoe) : _currRewardBalance;
+        uint256 _rewardBalance = _token == CRN ? _currRewardBalance.sub(_totalCrn) : _currRewardBalance;
 
-        if (_rewardBalance != lastRewardBalance[_token] && _totalJoe != 0) {
+        if (_rewardBalance != lastRewardBalance[_token] && _totalCrn != 0) {
             uint256 _accruedReward = _rewardBalance.sub(lastRewardBalance[_token]);
             _accRewardTokenPerShare = _accRewardTokenPerShare.add(
-                _accruedReward.mul(ACC_REWARD_PER_SHARE_PRECISION).div(_totalJoe)
+                _accruedReward.mul(ACC_REWARD_PER_SHARE_PRECISION).div(_totalCrn)
             );
         }
         return
@@ -248,13 +247,13 @@ contract StableJoeStaking is Ownable {
     }
 
     /**
-     * @notice Withdraw JOE and harvest the rewards
-     * @param _amount The amount of JOE to withdraw
+     * @notice Withdraw CRN and harvest the rewards
+     * @param _amount The amount of CRN to withdraw
      */
     function withdraw(uint256 _amount) external {
         UserInfo storage user = userInfo[_msgSender()];
         uint256 _previousAmount = user.amount;
-        require(_amount <= _previousAmount, "StableJoeStaking: withdraw amount exceeds balance");
+        require(_amount <= _previousAmount, "StableCronusStaking: withdraw amount exceeds balance");
         uint256 _newAmount = user.amount.sub(_amount);
         user.amount = _newAmount;
 
@@ -277,8 +276,8 @@ contract StableJoeStaking is Ownable {
             }
         }
 
-        internalJoeBalance = internalJoeBalance.sub(_amount);
-        joe.safeTransfer(_msgSender(), _amount);
+        internalCronusBalance = internalCronusBalance.sub(_amount);
+        CRN.safeTransfer(_msgSender(), _amount);
         emit Withdraw(_msgSender(), _amount);
     }
 
@@ -295,7 +294,7 @@ contract StableJoeStaking is Ownable {
             IERC20 _token = rewardTokens[i];
             user.rewardDebt[_token] = 0;
         }
-        joe.safeTransfer(_msgSender(), _amount);
+        CRN.safeTransfer(_msgSender(), _amount);
         emit EmergencyWithdraw(_msgSender(), _amount);
     }
 
@@ -305,22 +304,22 @@ contract StableJoeStaking is Ownable {
      * @dev Needs to be called before any deposit or withdrawal
      */
     function updateReward(IERC20 _token) public {
-        require(isRewardToken[_token], "StableJoeStaking: wrong reward token");
+        require(isRewardToken[_token], "StableCronusStaking: wrong reward token");
 
-        uint256 _totalJoe = internalJoeBalance;
+        uint256 _totalCrn = internalCronusBalance;
 
         uint256 _currRewardBalance = _token.balanceOf(address(this));
-        uint256 _rewardBalance = _token == joe ? _currRewardBalance.sub(_totalJoe) : _currRewardBalance;
+        uint256 _rewardBalance = _token == CRN ? _currRewardBalance.sub(_totalCrn) : _currRewardBalance;
 
-        // Did StableJoeStaking receive any token
-        if (_rewardBalance == lastRewardBalance[_token] || _totalJoe == 0) {
+        // Did StableCronusStaking receive any token
+        if (_rewardBalance == lastRewardBalance[_token] || _totalCrn == 0) {
             return;
         }
 
         uint256 _accruedReward = _rewardBalance.sub(lastRewardBalance[_token]);
 
         accRewardPerShare[_token] = accRewardPerShare[_token].add(
-            _accruedReward.mul(ACC_REWARD_PER_SHARE_PRECISION).div(_totalJoe)
+            _accruedReward.mul(ACC_REWARD_PER_SHARE_PRECISION).div(_totalCrn)
         );
         lastRewardBalance[_token] = _rewardBalance;
     }
@@ -338,7 +337,7 @@ contract StableJoeStaking is Ownable {
         uint256 _amount
     ) internal {
         uint256 _currRewardBalance = _token.balanceOf(address(this));
-        uint256 _rewardBalance = _token == joe ? _currRewardBalance.sub(internalJoeBalance) : _currRewardBalance;
+        uint256 _rewardBalance = _token == CRN ? _currRewardBalance.sub(internalCronusBalance) : _currRewardBalance;
 
         if (_amount > _rewardBalance) {
             lastRewardBalance[_token] = lastRewardBalance[_token].sub(_rewardBalance);

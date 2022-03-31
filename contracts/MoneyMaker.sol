@@ -6,6 +6,7 @@
 pragma solidity 0.6.12;
 
 import "./libraries/SafeMath.sol";
+import "./libraries/SafeERC20.sol";
 
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICronusPair.sol";
@@ -22,6 +23,7 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 contract MoneyMaker is Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     ICronusFactory public immutable factory;
 
@@ -218,7 +220,7 @@ contract MoneyMaker is Ownable {
             amount0 = IERC20(token0).balanceOf(address(this));
             amount1 = 0;
         } else {
-            IJoePair pair = ICronusPair(factory.getPair(token0, token1));
+            ICronusPair pair = ICronusPair(factory.getPair(token0, token1));
             require(address(pair) != address(0), "MoneyMaker: Invalid pair");
 
             IERC20(address(pair)).safeTransfer(address(pair), pair.balanceOf(address(this)));
@@ -336,7 +338,7 @@ contract MoneyMaker is Ownable {
     ) internal returns (uint256 amountOut) {
         // Checks
         // X1 - X5: OK
-        IJoePair pair = ICronusPair(factory.getPair(fromToken, toToken));
+        ICronusPair pair = ICronusPair(factory.getPair(fromToken, toToken));
         require(address(pair) != address(0), "MoneyMaker: Cannot convert");
 
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
@@ -346,7 +348,7 @@ contract MoneyMaker is Ownable {
         IERC20(fromToken).safeTransfer(address(pair), amountIn);
         uint256 amountInput = IERC20(fromToken).balanceOf(address(pair)).sub(reserveInput); // calculate amount that was transferred, this accounts for transfer taxes
 
-        amountOut = JoeLibrary.getAmountOut(amountInput, reserveInput, reserveOutput);
+        amountOut = CronusLibrary.getAmountOut(amountInput, reserveInput, reserveOutput);
 
         {
             uint256 rest = uint256(10_000).sub(slippage);
@@ -354,7 +356,7 @@ contract MoneyMaker is Ownable {
             /// hence why we do rest^2, i.e. calculating the slippage twice cause we actually do two swaps.
             /// This allows us to catch if a pair has low liquidity
             require(
-                JoeLibrary.getAmountOut(amountOut, reserveOutput, reserveInput) >=
+                CronusLibrary.getAmountOut(amountOut, reserveOutput, reserveInput) >=
                     amountInput.mul(rest).mul(rest).div(100_000_000),
                 "MoneyMaker: Slippage caught"
             );
