@@ -29,7 +29,7 @@ module.exports = {
       blockGasLimit: 20000000,
     },
     testnet: {
-      url: "https://evmos-archive-testnet.api.bdnodes.net:8545",
+      url: "https://eth.bd.evmos.dev:8545",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     rinkeby: {

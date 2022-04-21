@@ -831,15 +831,18 @@ async function main() {
   // TST-USDC - 0xAA8e85f34808c07C7548F64453169Da42daaC9B5
   // WEVMOS-DAI - 0xc8667Fb895F91e9A145ad6ef4a5130DF5c78393c
   // alloc point 100
+  // WBTC-OSMO: 0x8aADC289821D0Eb1f9718048763235B18c9b3DD1 100
+  // USDC-FRAX: 0xb2D9C26Ab3719f215a155aBF6c19A0ef0d11d078 100
+  // WBTC-USDC: 0x7e4563a51dc6C2E884715B81210D8f4162d6B62f 75
   // 0x0000000000000000000000000000000000000000
 
-    const farmAddress = "0x5C6ef4d8b2Ebd1362E711BDF7Ae6291c14609954";
-    const toke = "0x8Ce12Cb0CBAE2463b7f0f659449E2fD4988dB5B1";
+    const farmAddress = "0x616aC866aB53e7d3a6CD3A293536fcaD7eA85E10";
 
     const mc = new ethers.Contract(farmAddress, farmAbi, deployer);
 
-    const res = await mc.add(100, "0xc8667Fb895F91e9A145ad6ef4a5130DF5c78393c", "0x0000000000000000000000000000000000000000", {gasLimit: 518026});
-    //const res = await mc.transferOwnership(farmAddress, {gasLimit: 318026});
+    //const res = await mc.poolInfo(2); 100000000000000000
+    //const res = await mc.add(75, "0x7e4563a51dc6C2E884715B81210D8f4162d6B62f", "0x0000000000000000000000000000000000000000");
+    const res = await mc.updateEmissionRate("100000000000000000");
     console.log("Add farm result:", res);
 
 }

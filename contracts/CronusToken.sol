@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 // CronusToken with Governance.
-contract CronusToken is ERC20("CronusToken", "CRN"), Ownable {
+contract CronusToken is ERC20("Cronus", "CRN"), Ownable {
     /// @notice Total number of tokens
     uint256 public maxSupply = 6_000_000e18; // 6 million Cronus
 

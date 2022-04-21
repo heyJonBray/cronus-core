@@ -29,10 +29,6 @@ interface IRewarder {
 // Note that it's ownable and the owner wields tremendous power. The ownership
 // will be transferred to a governance smart contract once CRN is sufficiently
 // distributed and the community can show to govern itself.
-//
-// With thanks to the Lydia Finance team.
-//
-// Godspeed and may the 10x be with you.
 contract MasterChefCronus is Ownable {
     using SafeMath for uint256;
     using BoringERC20 for IERC20;
@@ -376,4 +372,26 @@ contract MasterChefCronus is Ownable {
         cronusPerSec = _cronusPerSec;
         emit UpdateEmissionRate(msg.sender, _cronusPerSec);
     }
+
+    // collects all pending rewards
+    function collectAllPoolRewards() public {
+        for (uint256 _pid = 0; _pid < poolInfo.length; _pid++) {
+            PoolInfo memory pool = poolInfo[_pid];
+            UserInfo memory user = userInfo[_pid][msg.sender];
+            updatePool(_pid);
+            if (user.amount > 0) {
+                // Harvest Cronus
+                uint256 pending = user.amount.mul(pool.accCronusPerShare).div(1e12).sub(user.rewardDebt);
+                safeCronusTransfer(msg.sender, pending);
+                emit Harvest(msg.sender, _pid, pending);
+            }
+            user.rewardDebt = user.amount.mul(pool.accCronusPerShare).div(1e12);
+
+            IRewarder rewarder = poolInfo[_pid].rewarder;
+            if (address(rewarder) != address(0)) {
+                rewarder.onCronusReward(msg.sender, user.amount);
+            }
+        }
+    }
+
 }

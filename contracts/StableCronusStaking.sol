@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /**
  * @title Stable Cronus Staking
- * @author Trader Cronus
+ * @author Cronus devs
  * @notice StableCronusStaking is a contract that allows CRN deposits and receives stablecoins sent by MoneyMaker's daily
  * harvests. Users deposit CRN and receive a share of what has been sent by MoneyMaker based on their participation of
  * the total deposited CRN. It is similar to a MasterChef, but we allow for claiming of different reward tokens

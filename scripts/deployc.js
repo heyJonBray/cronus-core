@@ -2181,6 +2181,19 @@ async function main() {
   const Pair = new ethers.Contract(pair, pairabi, deployer);
 
   const testToken = new ethers.Contract(tst, testabi, deployer);
+  const erc = await ethers.getContractFactory("MockERC20");
+  const ust = await erc.deploy("UST","UST");
+  const frax = await erc.deploy("FRAX","FRAX");
+  const wbtc = await erc.deploy("WBTC","WBTC");
+  const atom = await erc.deploy("ATOM","ATOM");
+  const osmo = await erc.deploy("OSMO","OSMO");
+
+  console.log("UST address", ust.address);
+  console.log("FRAX address", frax.address);
+  console.log("WBTC address", wbtc.address);
+  console.log("ATOM address", atom.address);
+  console.log("OSMO address", osmo.address);
+
   const usdt = new ethers.Contract("0x2c598B42CB7952E4F906FdEAF74a1Ed4c5966592", testabi, deployer);
   const usdc = new ethers.Contract("0x2b60d7059A177348312d8aF0ec7C4a41EF26119D", testabi, deployer);
   const dai = new ethers.Contract("0x0440d475455436c7B1bf6Ed42E8Fd6299789a65a", testabi, deployer);
@@ -2198,14 +2211,19 @@ async function main() {
   ];
 
   let testers2 = [
-    "0x309C8F789e2AcF8C7c0990C55b003D0b29eF32e5"
+    "0x9404DD94445a3b2043C9732F54eb78bD8Bc36aD8",
+    "0x84aa038C0c8d5aBf8d23D46bDBa428489669Cf96"
   ];
 
   for (let i = 0; i < testers2.length; i++){
-    await testToken.mint(testers2[i],"10000000000000000000000");
-    await usdt.mint(testers2[i],"10000000000000000000000");
-    await usdc.mint(testers2[i],"10000000000000000000000");
-    await dai.mint(testers2[i],"10000000000000000000000");
+    await usdt.mint(testers2[i],"1000000000000000000000000");
+    await usdc.mint(testers2[i],"1000000000000000000000000");
+    await dai.mint(testers2[i],"1000000000000000000000000");
+    await ust.mint(testers2[i],"1000000000000000000000000");
+    await frax.mint(testers2[i],"1000000000000000000000000");
+    await wbtc.mint(testers2[i],"1000000000000000000000000");
+    await osmo.mint(testers2[i],"1000000000000000000000000");
+    await atom.mint(testers2[i],"1000000000000000000000000");
   }
 
 
