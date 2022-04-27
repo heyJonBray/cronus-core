@@ -22,7 +22,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.6.12",
+  solidity: {
+    version: "0.6.12",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
+    },
   networks: {
     hardhat: {
       chainId: 1,
@@ -34,6 +42,10 @@ module.exports = {
     },
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/c4391fb7499c4423b6e8a62e0e87359d",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    evmos: {
+      url: "https://eth.bd.evmos.org:8545",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }
   },

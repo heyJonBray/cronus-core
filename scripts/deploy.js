@@ -6,26 +6,18 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  //const WETH = await ethers.getContractFactory("WEVMOS");
-  //const weth = await WETH.deploy();
-
   const Multicall = await ethers.getContractFactory("Multicall");
   const multicall = await Multicall.deploy();
-  
-  const LPtoken = await ethers.getContractFactory("CronusERC20");
-  const lptoken = await LPtoken.deploy();
 
   const Factory = await ethers.getContractFactory("CronusFactory");
   const factory = await Factory.deploy(deployer.address);
 
   const Router = await ethers.getContractFactory("CronusRouter02");
-  const router = await Router.deploy(factory.address, "0xc778417E063141139Fce010982780140Aa0cD5Ab");
+  const router = await Router.deploy(factory.address, "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517");
 
   console.log("Multicall address:", multicall.address);
-  console.log("LPtoken address:", lptoken.address);
   console.log("Factory address:", factory.address);
   console.log("Router address:", router.address);
-
 /*
 
   const WETH = await ethers.getContractFactory("MockERC20");
