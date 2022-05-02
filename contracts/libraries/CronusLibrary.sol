@@ -21,7 +21,7 @@ library CronusLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'ea9645804ac90dfacad95722451893fc85c951fe30990c9c577bb1b636522211' // init code hash 
+                hex'c2c769f6cbfb568ac8562fb6e250ca27d65a3c02c8276593bd86244d6d5c6001' // init code hash 
             ))));
     }
 
